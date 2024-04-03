@@ -86,6 +86,11 @@ private:
         m.getRPY(roll, pitch, yaw, 1);
         // store the current yaw_
         yaw_ = yaw;
+
+        // log values
+        // RCLCPP_INFO(this->get_logger(), "Position: (%f, %f, %f)", position_.x, position_.y, position_.z);
+        // RCLCPP_INFO(this->get_logger(), "Yaw: %f", yaw_);
+        RCLCPP_INFO(this->get_logger(), "Position: (%f, %f, %f) Yaw: %f", position_.x, position_.y, position_.z, yaw_);
     }
 
     rclcpp_action::GoalResponse handle_goal(
