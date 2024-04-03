@@ -54,7 +54,7 @@ public:
         }
 
         // Wait for the result
-        auto future_result = goal_handle->async_get_result();
+        auto future_result = this->client_ptr_->async_result(goal_handle);
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future_result) !=
             rclcpp::FutureReturnCode::SUCCESS)
         {
