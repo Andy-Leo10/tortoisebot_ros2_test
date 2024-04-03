@@ -32,4 +32,27 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
+#EXECUTABLES
+#action-server
+add_executable(tortoisebot_action_server src/tortoisebot_action_server.cpp)
+ament_target_dependencies(tortoisebot_action_server rclcpp rclcpp_action std_msgs geometry_msgs nav_msgs tf2 tf2_ros)
+rosidl_target_interfaces(tortoisebot_action_server ${PROJECT_NAME} "rosidl_typesupport_cpp")
+#action-client
+add_executable(exp_action_client src/exp_action_client.cpp)
+ament_target_dependencies(exp_action_client rclcpp rclcpp_action std_msgs geometry_msgs nav_msgs tf2 tf2_ros)
+rosidl_target_interfaces(exp_action_client ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+#install executables
+install(TARGETS
+  tortoisebot_action_server
+  exp_action_client
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+#folders to install
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
+)
+
 ament_package()

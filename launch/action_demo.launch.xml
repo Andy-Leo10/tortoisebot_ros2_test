@@ -1,0 +1,16 @@
+<launch>
+
+    <!-- <arg name="package_description" default="attach_shelf"/>
+    <arg name="rviz_config_file_name" default="config1.rviz"/>
+    <include file="$(find-pkg-share $(var package_description))/launch/start_rviz_with_arguments.launch.py">
+        <arg name="rviz_config_file_name" value="$(var rviz_config_file_name)"/>
+    </include> -->
+
+    <!-- action server -->
+    <node pkg="tortoisebot_ros2_test" exec="tortoisebot_action_server" name="action_server_node" output="screen"/>
+    </node>
+    <!-- action client -->
+    <node pkg="tortoisebot_ros2_test" exec="exp_action_client" name="action_client_node" output="screen"/>
+    </node>
+
+</launch>

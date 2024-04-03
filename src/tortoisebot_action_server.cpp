@@ -1,0 +1,160 @@
+#include "rclcpp/rclcpp.hpp"
+#include "geometry_msgs/msg/twist.hpp"
+#include "nav_msgs/msg/odometry.hpp"
+#include "course_web_dev_ros/msg/waypoint_action.hpp"
+#include "tf2/LinearMath/Quaternion.h"
+#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include <cmath>
+
+class WaypointActionClass : public rclcpp::Node
+{
+public:
+    WaypointActionClass() : Node("tortoisebot_as")
+    {
+        // Action server
+        action_server_ = rclcpp_action::create_server<course_web_dev_ros::action::WaypointAction>(
+            this, "tortoisebot_as",
+            std::bind(&WaypointActionClass::goal_callback, this, std::placeholders::_1),
+            std::bind(&WaypointActionClass::handle_cancel, this, std::placeholders::_1),
+            std::bind(&WaypointActionClass::handle_accepted, this, std::placeholders::_1));
+
+        // Publishers and Subscribers
+        pub_cmd_vel_ = this->create_publisher<geometry_msgs::msg::Twist>("/cmd_vel", 1);
+        sub_odom_ = this->create_subscription<nav_msgs::msg::Odometry>(
+            "/odom", 1, std::bind(&WaypointActionClass::clbk_odom, this, std::placeholders::_1));
+
+        RCLCPP_INFO(this->get_logger(), "Action server started");
+    }
+
+private:
+    // Action server
+    rclcpp_action::Server<course_web_dev_ros::action::WaypointAction>::SharedPtr action_server_;
+
+    // Publishers and Subscribers
+    rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr pub_cmd_vel_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr sub_odom_;
+
+    // Robot state variables
+    geometry_msgs::msg::Point position_;
+    double yaw_;
+
+    // Goal and parameters
+    geometry_msgs::msg::Point des_pos_;
+    double yaw_precision_ = M_PI / 90; // +/- 2 degrees allowed
+    double dist_precision_ = 0.05;
+
+    // State
+    std::string state_;
+
+    // Feedback and Result
+    course_web_dev_ros::action::WaypointAction::Feedback feedback_;
+    course_web_dev_ros::action::WaypointAction::Result result_;
+
+    void clbk_odom(const nav_msgs::msg::Odometry::SharedPtr msg)
+    {
+        // Position
+        position_ = msg->pose.pose.position;
+
+        // Yaw
+        tf2::Quaternion q(
+            msg->pose.pose.orientation.x,
+            msg->pose.pose.orientation.y,
+            msg->pose.pose.orientation.z,
+            msg->pose.pose.orientation.w);
+        yaw_ = tf2::getYaw(q);
+    }
+
+    rclcpp_action::GoalResponse handle_accepted(const std::shared_ptr<const rclcpp_action::GoalHandle<course_web_dev_ros::action::WaypointAction>> goal_handle)
+    {
+        RCLCPP_INFO(this->get_logger(), "Goal %s received", goal_handle->get_goal()->position);
+
+        // Initializations
+        rclcpp_action::GoalResponse res = rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+        auto goal = goal_handle->get_goal();
+
+        // Define desired position and errors
+        des_pos_ = goal->position;
+        double desired_yaw = std::atan2(des_pos_.y - position_.y, des_pos_.x - position_.x);
+        double err_pos = std::sqrt(std::pow(des_pos_.y - position_.y, 2) + std::pow(des_pos_.x - position_.x, 2));
+        double err_yaw = desired_yaw - yaw_;
+
+        // Perform task
+        while (err_pos > dist_precision_)
+        {
+            // Update variables
+            desired_yaw = std::atan2(des_pos_.y - position_.y, des_pos_.x - position_.x);
+            err_yaw = desired_yaw - yaw_;
+            err_pos = std::sqrt(std::pow(des_pos_.y - position_.y, 2) + std::pow(des_pos_.x - position_.x, 2));
+            RCLCPP_INFO(this->get_logger(), "Current Yaw: %f", yaw_);
+            RCLCPP_INFO(this->get_logger(), "Desired Yaw: %f", desired_yaw);
+            RCLCPP_INFO(this->get_logger(), "Error Yaw: %f", err_yaw);
+
+            // Logic
+            if (goal_handle->is_canceling())
+            {
+                // Cancelled
+                RCLCPP_INFO(this->get_logger(), "The goal has been cancelled/preempted");
+                result_.success = false;
+                goal_handle->canceled(result_);
+                res = rclcpp_action::GoalResponse::REJECT;
+                break;
+            }
+            else if (std::fabs(err_yaw) > yaw_precision_)
+            {
+                // Fix yaw
+                RCLCPP_INFO(this->get_logger(), "fix yaw");
+                state_ = "fix yaw";
+                auto twist_msg = std::make_unique<geometry_msgs::msg::Twist>();
+                twist_msg->angular.z = err_yaw > 0 ? 0.65 : -0.65;
+                pub_cmd_vel_->publish(std::move(twist_msg));
+            }
+            else
+            {
+                // Go to point
+                RCLCPP_INFO(this->get_logger(), "go to point");
+                state_ = "go to point";
+                auto twist_msg = std::make_unique<geometry_msgs::msg::Twist>();
+                twist_msg->linear.x = 0.6;
+                twist_msg->angular.z = 0;
+                pub_cmd_vel_->publish(std::move(twist_msg));
+            }
+
+            // Send feedback
+            feedback_.position = position_;
+            feedback_.state = state_;
+            goal_handle->publish_feedback(feedback_);
+
+            // Loop rate
+            rclcpp::sleep_for(std::chrono::milliseconds(40));
+        }
+
+        // Stop
+        auto twist_msg = std::make_unique<geometry_msgs::msg::Twist>();
+        twist_msg->linear.x = 0;
+        twist_msg->angular.z = 0;
+        pub_cmd_vel_->publish(std::move(twist_msg));
+
+        // Return result
+        if (res == rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE)
+        {
+            result_.success = true;
+            goal_handle->succeed(result_);
+        }
+
+        return res;
+    }
+
+    void handle_cancel(const std::shared_ptr<const rclcpp_action::GoalHandle<course_web_dev_ros::action::WaypointAction>> goal_handle)
+    {
+        RCLCPP_INFO(this->get_logger(), "Goal cancelled");
+    }
+};
+
+int main(int argc, char **argv)
+{
+    rclcpp::init(argc, argv);
+    auto node = std::make_shared<WaypointActionClass>();
+    rclcpp::spin(node);
+    rclcpp::shutdown();
+    return 0;
+}
