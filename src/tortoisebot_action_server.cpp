@@ -90,7 +90,7 @@ private:
         // log values
         // RCLCPP_INFO(this->get_logger(), "Position: (%f, %f, %f)", position_.x, position_.y, position_.z);
         // RCLCPP_INFO(this->get_logger(), "Yaw: %f", yaw_);
-        RCLCPP_INFO(this->get_logger(), "Position: (%f, %f, %f) Yaw: %f", position_.x, position_.y, position_.z, yaw_);
+        RCLCPP_INFO(this->get_logger(), "Position: (%.2f, %.2f, %.2f) Yaw: %.2f", position_.x, position_.y, position_.z, yaw_);
     }
 
     rclcpp_action::GoalResponse handle_goal(
@@ -121,6 +121,8 @@ private:
         // Perform task
         while (err_pos > dist_precision_)
         {
+            // spin once
+            rclcpp::spin_some(this->get_node_base_interface());
             // Update variables
             desired_yaw = std::atan2(des_pos_.y - position_.y, des_pos_.x - position_.x);
             err_yaw = desired_yaw - yaw_;

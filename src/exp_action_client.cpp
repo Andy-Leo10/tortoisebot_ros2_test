@@ -41,11 +41,11 @@ int main(int argc, char **argv)
     RCLCPP_INFO(waypoint_client->get_logger(), "Moving to waypoint: (0.5, 0.5, 0.0)");
     waypoint_client->send_goal(0.5, 0.5, 0.0);
 
-    RCLCPP_INFO(waypoint_client->get_logger(), "Moving to waypoint: (0.25, 0.25, 0.0)");
-    waypoint_client->send_goal(0.25, 0.25, 0.0);
+    // RCLCPP_INFO(waypoint_client->get_logger(), "Moving to waypoint: (0.25, 0.25, 0.0)");
+    // waypoint_client->send_goal(0.25, 0.25, 0.0);
 
-    RCLCPP_INFO(waypoint_client->get_logger(), "Moving to waypoint: (-0.25, -0.25, 0.0)");
-    waypoint_client->send_goal(-0.25, -0.25, 0.0);
+    // RCLCPP_INFO(waypoint_client->get_logger(), "Moving to waypoint: (-0.25, -0.25, 0.0)");
+    // waypoint_client->send_goal(-0.25, -0.25, 0.0);
 
     rclcpp::spin(waypoint_client);
     rclcpp::shutdown();
