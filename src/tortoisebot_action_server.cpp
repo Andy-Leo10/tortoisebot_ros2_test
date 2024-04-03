@@ -129,7 +129,7 @@ private:
             {
                 // Cancelled
                 RCLCPP_INFO(this->get_logger(), "The goal has been cancelled/preempted");
-                result_.success = false;
+                result_->success = false;
                 goal_handle->canceled(result_);
                 res = rclcpp_action::GoalResponse::REJECT;
                 break;
@@ -155,8 +155,8 @@ private:
             }
 
             // Send feedback
-            feedback_.position = position_;
-            feedback_.state = state_;
+            feedback_->position = position_;
+            feedback_->state = state_;
             goal_handle->publish_feedback(feedback_);
 
             // Loop rate
@@ -172,7 +172,7 @@ private:
         // Return result
         if (res == rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE)
         {
-            result_.success = true;
+            result_->success = true;
             goal_handle->succeed(result_);
         }
 
