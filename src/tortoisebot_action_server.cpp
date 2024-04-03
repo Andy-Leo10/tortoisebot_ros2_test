@@ -3,12 +3,23 @@
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "tf2/LinearMath/Quaternion.h"
-#include "tf2_geometry_msgs/tf2_geometry_msgs.h"
+#include "tf2/LinearMath/Matrix3x3.h"
 #include <cmath>
 //custom service
 #include "tortoisebot_waypoints/action/waypoint_action.hpp"
+// content of the action interface
+// # goal definition
+// geometry_msgs/Point position
+// ---
+// # result definition
+// bool success
+// ---
+// # feedback
+// geometry_msgs/Point position
+// string state
 
 using WaypointAction = tortoisebot_waypoints::action::WaypointAction;
+using GoalHandleWaypoint = rclcpp_action::ServerGoalHandle<WaypointAction>;
 using std::placeholders::_1;
 using std::placeholders::_2;
 using std::placeholders::_3;
@@ -21,7 +32,7 @@ public:
         // Action server
         action_server_ = rclcpp_action::create_server<WaypointAction>(
             this, "tortoisebot_as",
-            std::bind(&WaypointActionClass::goal_callback, this, _1),
+            std::bind(&WaypointActionClass::handle_goal, this, _1, _2),
             std::bind(&WaypointActionClass::handle_cancel, this, _1),
             std::bind(&WaypointActionClass::handle_accepted, this, _1));
 
@@ -155,9 +166,12 @@ private:
         return res;
     }
 
-    void handle_cancel(const std::shared_ptr<const rclcpp_action::GoalHandle<WaypointAction>> goal_handle)
+    void handle_cancel(
+        const std::shared_ptr<GoalHandleWaypoint> goal_handle)
     {
         RCLCPP_INFO(this->get_logger(), "Goal cancelled");
+        (void)goal_handle;
+        return rclcpp_action::CancelResponse::ACCEPT;
     }
 };
 
