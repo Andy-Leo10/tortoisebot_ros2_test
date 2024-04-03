@@ -1,10 +1,11 @@
 #include "rclcpp/rclcpp.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "nav_msgs/msg/odometry.hpp"
-#include "course_web_dev_ros/msg/waypoint_action.hpp"
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2_geometry_msgs/tf2_geometry_msgs.h"
 #include <cmath>
+//custom service
+#include "tortoisebot_waypoints/action/waypoint_action.hpp"
 
 class WaypointActionClass : public rclcpp::Node
 {
