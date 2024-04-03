@@ -40,7 +40,7 @@ public:
 
         // Wait for the result
         if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future_result) ==
-            rclcpp::executor::FutureReturnCode::SUCCESS)
+            rclcpp::FutureReturnCode::SUCCESS)
         {
             RCLCPP_INFO(this->get_logger(), "Goal was successful");
         }
