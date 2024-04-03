@@ -86,7 +86,17 @@ private:
         yaw_ = yaw;
     }
 
-    rclcpp_action::GoalResponse handle_accepted(const std::shared_ptr<const rclcpp_action::GoalHandle<WaypointAction>> goal_handle)
+    rclcpp_action::GoalResponse handle_goal(
+        const rclcpp_action::GoalUUID &uuid,
+        std::shared_ptr<const WaypointAction::Goal> goal)
+    {
+        (void)uuid;
+        (void)goal;
+        return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+    }
+
+    rclcpp_action::GoalResponse handle_accepted(
+        const std::shared_ptr<GoalHandleWaypoint> goal_handle)
     {
         RCLCPP_INFO(this->get_logger(), "Goal %s received", goal_handle->get_goal()->position);
 
@@ -166,7 +176,7 @@ private:
         return res;
     }
 
-    void handle_cancel(
+    rclcpp_action::CancelResponse handle_cancel(
         const std::shared_ptr<GoalHandleWaypoint> goal_handle)
     {
         RCLCPP_INFO(this->get_logger(), "Goal cancelled");
