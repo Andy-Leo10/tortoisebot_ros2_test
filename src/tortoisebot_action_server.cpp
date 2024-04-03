@@ -5,6 +5,8 @@
 #include "tf2/LinearMath/Quaternion.h"
 #include "tf2/LinearMath/Matrix3x3.h"
 #include <cmath>
+#include <memory>
+#include <thread>
 //custom service
 #include "tortoisebot_waypoints/action/waypoint_action.hpp"
 // content of the action interface
@@ -102,7 +104,13 @@ private:
         return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
     }
 
-    rclcpp_action::GoalResponse handle_accepted(
+    void handle_accepted(const std::shared_ptr<GoalHandleWaypoint> goal_handle)
+    {
+        // this needs to return quickly to avoid blocking the executor, so spin up a new thread
+        std::thread{std::bind(&WaypointActionClass::execute, this, _1), goal_handle}.detach();
+    }
+
+    rclcpp_action::GoalResponse execute(
         const std::shared_ptr<GoalHandleWaypoint> goal_handle)
     {
         auto pos = goal_handle->get_goal()->position;
@@ -121,8 +129,6 @@ private:
         // Perform task
         while (err_pos > dist_precision_)
         {
-            // spin once
-            rclcpp::spin_some(this->get_node_base_interface());
             // Update variables
             desired_yaw = std::atan2(des_pos_.y - position_.y, des_pos_.x - position_.x);
             err_yaw = desired_yaw - yaw_;
