@@ -27,7 +27,9 @@ using std::placeholders::_3;
 class WaypointActionClass : public rclcpp::Node
 {
 public:
-    WaypointActionClass() : Node("tortoisebot_as")
+    WaypointActionClass() : Node("tortoisebot_as"),
+                            feedback_(std::make_shared<WaypointAction::Feedback>()),
+                            result_(std::make_shared<WaypointAction::Result>())
     {
         // Action server
         action_server_ = rclcpp_action::create_server<WaypointAction>(
@@ -65,8 +67,8 @@ private:
     std::string state_;
 
     // Feedback and Result
-    auto feedback_ = std::make_shared<WaypointAction::Feedback>();
-    auto result_ = std::make_shared<WaypointAction::Result>();
+    std::shared_ptr<WaypointAction::Feedback> feedback_;
+    std::shared_ptr<WaypointAction::Result> result_;
 
     void clbk_odom(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
