@@ -65,8 +65,8 @@ private:
     std::string state_;
 
     // Feedback and Result
-    WaypointAction::Feedback feedback_;
-    WaypointAction::Result result_;
+    auto feedback_ = std::make_shared<WaypointAction::Feedback>();
+    auto result_ = std::make_shared<WaypointAction::Result>();
 
     void clbk_odom(const nav_msgs::msg::Odometry::SharedPtr msg)
     {
@@ -98,7 +98,8 @@ private:
     rclcpp_action::GoalResponse handle_accepted(
         const std::shared_ptr<GoalHandleWaypoint> goal_handle)
     {
-        RCLCPP_INFO(this->get_logger(), "Goal %s received", goal_handle->get_goal()->position);
+        auto pos = goal_handle->get_goal()->position;
+        RCLCPP_INFO(this->get_logger(), "Goal (%f, %f, %f) received", pos.x, pos.y, pos.z);
 
         // Initializations
         rclcpp_action::GoalResponse res = rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
