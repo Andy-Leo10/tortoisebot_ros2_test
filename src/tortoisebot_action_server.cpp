@@ -92,7 +92,7 @@ private:
         // log values
         // RCLCPP_INFO(this->get_logger(), "Position: (%f, %f, %f)", position_.x, position_.y, position_.z);
         // RCLCPP_INFO(this->get_logger(), "Yaw: %f", yaw_);
-        RCLCPP_INFO(this->get_logger(), "Position: (%.2f, %.2f, %.2f) Yaw: %.2f", position_.x, position_.y, position_.z, yaw_);
+        // RCLCPP_INFO(this->get_logger(), "Position: (%.2f, %.2f, %.2f) Yaw: %.2f", position_.x, position_.y, position_.z, yaw_);
     }
 
     rclcpp_action::GoalResponse handle_goal(
