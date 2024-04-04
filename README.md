@@ -36,3 +36,21 @@ ros2 action send_goal -f /tortoisebot_as tortoisebot_waypoints/action/WaypointAc
   y: 0.5
   z: 0.0"
 ```
+## TEST
+build
+```shell
+cd ~/ros2_ws/ ;colcon build;source install/setup.bash
+```
+run test
+```shell
+colcon test --packages-select tortoisebot_waypoints --event-handler=console_direct+
+```
+check summary
+```shell
+colcon test-result --test-result-base build/tortoisebot_waypoints
+```
+clean tests
+```
+rm -r ~/ros2_ws/build/tortoisebot_waypoints/test_results
+rm -r ~/ros2_ws/build/tortoisebot_waypoints/Testing
+```
