@@ -21,17 +21,6 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   DEPENDENCIES geometry_msgs
 )
 
-if(BUILD_TESTING)
-  find_package(ament_lint_auto REQUIRED)
-  # the following line skips the linter which checks for copyrights
-  # uncomment the line when a copyright and license is not present in all source files
-  #set(ament_cmake_copyright_FOUND TRUE)
-  # the following line skips cpplint (only works in a git repo)
-  # uncomment the line when this package is not in a git repo
-  #set(ament_cmake_cpplint_FOUND TRUE)
-  ament_lint_auto_find_test_dependencies()
-endif()
-
 #EXECUTABLES
 #action-server
 add_executable(tortoisebot_action_server src/tortoisebot_action_server.cpp)
@@ -54,5 +43,35 @@ install(DIRECTORY
   launch
   DESTINATION share/${PROJECT_NAME}/
 )
+
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  find_package(ament_cmake_gtest REQUIRED)
+
+  set(TESTFILES
+    test/main.cpp
+    test/test_action_client.cpp
+  )
+
+  # Add a gtest executables
+  ament_add_gtest(${PROJECT_NAME}_test ${TESTFILES})
+  # Set the timeout for MyTest to X seconds
+  set_tests_properties(${PROJECT_NAME}_test PROPERTIES
+  	TIMEOUT 63
+	  # PASS_REGULAR_EXPRESSION "[  PASSED  ]"
+    # FAIL_REGULAR_EXPRESSION "FAILED  ] 1 test,"
+	  # ENVIRONMENT "VAR1=value1;VAR2=value2"
+  )
+  ament_target_dependencies(${PROJECT_NAME}_test rclcpp rclcpp_action std_msgs geometry_msgs nav_msgs tf2 tf2_ros)
+  rosidl_target_interfaces(${PROJECT_NAME}_test ${PROJECT_NAME} "rosidl_typesupport_cpp")
+
+  # install the test executables
+  install(TARGETS
+    ${PROJECT_NAME}_test
+    DESTINATION lib/${PROJECT_NAME}
+  )
+  # uncomment to enforce lintners and static code analyzers defined in ament_lint_common package
+  # ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_package()
