@@ -115,7 +115,13 @@ protected:
   std::shared_ptr<WaypointActionClient> action_client_;
 };
 
-TEST_F(WaypointActionClientTest, TestGoalCompletion) {
+// NOTE: !!!
+// In Google Test, each TEST_F is a separate test case and they do not share state
+// This means that the action_client_ object is destroyed and recreated for each test
+// This is why I run 2 tests
+// Also note that both results are checked in the test
+
+TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
   EXPECT_TRUE(action_client_->is_server_available());
   // log if server is available or not
   if (action_client_->is_server_available()) {
@@ -124,7 +130,7 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion) {
     RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
   }
 
-  action_client_->send_goal(0.5, 0.5, 0.0);
+  action_client_->send_goal(0.3, 0.0, 0.0);
   // log goal sent content
   RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
   while(!action_client_->is_goal_done()) {
@@ -132,21 +138,33 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion) {
   }
 
   EXPECT_TRUE(action_client_->is_goal_done());
-  // // show the result
-  // RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
-  // RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
-  // EXPECT_TRUE(action_client_->get_result_pos());
-  // EXPECT_TRUE(action_client_->get_result_yaw());
-}
-
-TEST_F(WaypointActionClientTest, TestResultPos) {
   // show the result
   RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
   EXPECT_TRUE(action_client_->get_result_pos());
+  EXPECT_TRUE(action_client_->get_result_yaw());
 }
 
-TEST_F(WaypointActionClientTest, TestResultYaw) {
+TEST_F(WaypointActionClientTest, TestGoalCompletion2) {
+  EXPECT_TRUE(action_client_->is_server_available());
+  // log if server is available or not
+  if (action_client_->is_server_available()) {
+    RCLCPP_INFO(action_client_->get_logger(), "~~~~~Server is available");
+  } else {
+    RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
+  }
+
+  action_client_->send_goal(0.0, 0.3, 0.0);
+  // log goal sent content
+  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
+  while(!action_client_->is_goal_done()) {
+    rclcpp::spin_some(action_client_);
+  }
+
+  EXPECT_TRUE(action_client_->is_goal_done());
   // show the result
+  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
   RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  EXPECT_TRUE(action_client_->get_result_pos());
   EXPECT_TRUE(action_client_->get_result_yaw());
 }
