@@ -27,7 +27,7 @@ ros2 run tortoisebot_waypoints tortoisebot_action_server
 **run client**
 ```shell
 source ~/ros2_ws/install/setup.bash
-cd ~/ros2_ws/ ;colcon build;source install/setup.bash
+ros2 run tortoisebot_waypoints exp_action_client
 ```
 or
 ```shell
