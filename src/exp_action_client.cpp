@@ -22,7 +22,7 @@ public:
         return this->client_ptr_->wait_for_action_server(std::chrono::seconds(10));
     }
 
-    void send_goal(double x, double y, double z)
+    std::shared_future<GoalHandleWaypoint::SharedPtr> send_goal(double x, double y, double z)
     {
         auto goal_msg = WaypointAction::Goal();
         goal_msg.position.x = x;
@@ -35,7 +35,7 @@ public:
         send_goal_options.feedback_callback =
             std::bind(&WaypointActionClient::feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
 
-        this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
+        return this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
     }
 
 private:
