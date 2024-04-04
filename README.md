@@ -54,3 +54,12 @@ clean tests
 rm -r ~/ros2_ws/build/tortoisebot_waypoints/test_results
 rm -r ~/ros2_ws/build/tortoisebot_waypoints/Testing
 ```
+
+## RESULTS
+> **test-pass:** 
+tests pass correctly if the goal is reached before and before timeout
+![test-pass](pictures/ros2_pass.png)
+
+> **test-fail:** 
+tests don't pass correctly if the goal is not reached or due to timeout
+![test-fail](pictures/ros2_fail.png)
