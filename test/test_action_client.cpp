@@ -130,7 +130,7 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
     RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
   }
 
-  action_client_->send_goal(0.3, 0.0, 0.0);
+  action_client_->send_goal(0.5, 0.0, 0.0);
   // log goal sent content
   RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
   while(!action_client_->is_goal_done()) {
@@ -139,8 +139,8 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
 
   EXPECT_TRUE(action_client_->is_goal_done());
   // show the result
-  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
-  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
   EXPECT_TRUE(action_client_->get_result_pos());
   EXPECT_TRUE(action_client_->get_result_yaw());
 }
@@ -154,7 +154,7 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion2) {
     RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
   }
 
-  action_client_->send_goal(0.0, 0.3, 0.0);
+  action_client_->send_goal(0.0, 0.5, 0.0);
   // log goal sent content
   RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
   while(!action_client_->is_goal_done()) {
@@ -163,8 +163,8 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion2) {
 
   EXPECT_TRUE(action_client_->is_goal_done());
   // show the result
-  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
-  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
   EXPECT_TRUE(action_client_->get_result_pos());
   EXPECT_TRUE(action_client_->get_result_yaw());
 }
