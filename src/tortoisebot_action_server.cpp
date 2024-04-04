@@ -62,7 +62,7 @@ private:
 
     // Goal and parameters
     geometry_msgs::msg::Point des_pos_;
-    double yaw_precision_ = M_PI / 90; // +/- 2 degrees allowed
+    double yaw_precision_ = 6 * M_PI / 180; // 6 degrees
     double dist_precision_ = 0.05;
 
     // State

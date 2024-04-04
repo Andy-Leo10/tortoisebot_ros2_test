@@ -115,7 +115,7 @@ protected:
   std::shared_ptr<WaypointActionClient> action_client_;
 };
 
-TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
+TEST_F(WaypointActionClientTest, TestGoalCompletion) {
   EXPECT_TRUE(action_client_->is_server_available());
   // log if server is available or not
   if (action_client_->is_server_available()) {
@@ -132,10 +132,21 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
   }
 
   EXPECT_TRUE(action_client_->is_goal_done());
-  // show the result
-  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
-  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
-  EXPECT_TRUE(action_client_->get_result_pos());
-  EXPECT_TRUE(action_client_->get_result_yaw());
+  // // show the result
+  // RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  // RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  // EXPECT_TRUE(action_client_->get_result_pos());
+  // EXPECT_TRUE(action_client_->get_result_yaw());
 }
 
+TEST_F(WaypointActionClientTest, TestResultPos) {
+  // show the result
+  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  EXPECT_TRUE(action_client_->get_result_pos());
+}
+
+TEST_F(WaypointActionClientTest, TestResultYaw) {
+  // show the result
+  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  EXPECT_TRUE(action_client_->get_result_yaw());
+}
