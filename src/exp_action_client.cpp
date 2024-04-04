@@ -35,49 +35,7 @@ public:
         send_goal_options.feedback_callback =
             std::bind(&WaypointActionClient::feedback_callback, this, std::placeholders::_1, std::placeholders::_2);
 
-        // Send the goal and get a future for the result
-        auto future_goal_handle = this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
-
-        // Wait for the goal to be accepted
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future_goal_handle) !=
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Failed to send goal");
-            return;
-        }
-
-        auto goal_handle = future_goal_handle.get();
-
-        if (!goal_handle) {
-            RCLCPP_ERROR(this->get_logger(), "Goal was rejected by server");
-            return;
-        }
-
-        // Wait for the result
-        auto future_result = goal_handle->async_get_result();
-        if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), future_result) !=
-            rclcpp::FutureReturnCode::SUCCESS)
-        {
-            RCLCPP_ERROR(this->get_logger(), "Failed to get result");
-            return;
-        }
-
-        auto result = future_result.get();
-
-        switch(result.code) {
-            case rclcpp_action::ResultCode::SUCCEEDED:
-                RCLCPP_INFO(this->get_logger(), "Goal was successful");
-                break;
-            case rclcpp_action::ResultCode::ABORTED:
-                RCLCPP_INFO(this->get_logger(), "Goal was aborted by the action server");
-                break;
-            case rclcpp_action::ResultCode::CANCELED:
-                RCLCPP_INFO(this->get_logger(), "Goal was canceled");
-                break;
-            default:
-                RCLCPP_INFO(this->get_logger(), "Unknown result code");
-                break;
-        }
+        this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
     }
 
 private:
@@ -115,6 +73,7 @@ int main(int argc, char ** argv)
     action_client->send_goal(0.5, 0.0, 0.0);
     action_client->send_goal(0.0, 0.5, 0.0);
 
+    rclcpp::spin(action_client);
     rclcpp::shutdown();
     return 0;
 }
