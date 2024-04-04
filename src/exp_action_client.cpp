@@ -82,9 +82,9 @@ private:
                 this->result_pos_ = result.result->success_pos;
                 this->result_yaw_ = result.result->success_yaw;
                 this->goal_done_ = true;
-                // log the result
-                RCLCPP_INFO(this->get_logger(), "Result Pos: %s", this->result_pos_ ? "Success" : "Failure");
-                RCLCPP_INFO(this->get_logger(), "Result Yaw: %s", this->result_yaw_ ? "Success" : "Failure");
+                // // log the result
+                // RCLCPP_INFO(this->get_logger(), "Result Pos: %s", this->result_pos_ ? "Success" : "Failure");
+                // RCLCPP_INFO(this->get_logger(), "Result Yaw: %s", this->result_yaw_ ? "Success" : "Failure");
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_INFO(this->get_logger(), "Goal was aborted");

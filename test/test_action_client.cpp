@@ -12,7 +12,9 @@ class WaypointActionClient : public rclcpp::Node
 {
 public:
     WaypointActionClient() : Node("waypoint_action_client"),
-                            goal_done_(false)
+                            goal_done_(false),
+                            result_pos_(false),
+                            result_yaw_(false)
     {
         this->client_ptr_ = rclcpp_action::create_client<WaypointAction>(
             this,
@@ -27,6 +29,8 @@ public:
     std::shared_future<GoalHandleWaypoint::SharedPtr> send_goal(double x, double y, double z)
     {
         this->goal_done_ = false;
+        this->result_pos_ = false;
+        this->result_yaw_ = false;
 
         auto goal_msg = WaypointAction::Goal();
         goal_msg.position.x = x;
@@ -43,14 +47,15 @@ public:
         return this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
     }
 
-    bool is_goal_done() const
-    {
-        return this->goal_done_;
-    }
+    bool is_goal_done() const { return goal_done_; }
+    bool get_result_pos() const { return result_pos_; }
+    bool get_result_yaw() const { return result_yaw_; }
     
 private:
     rclcpp_action::Client<WaypointAction>::SharedPtr client_ptr_;
     bool goal_done_;
+    bool result_pos_;
+    bool result_yaw_;
 
     void goal_response_callback(std::shared_future<GoalHandleWaypoint::SharedPtr> future)
     {
@@ -75,7 +80,12 @@ private:
         {
             case rclcpp_action::ResultCode::SUCCEEDED:
                 RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+                this->result_pos_ = result.result->success_pos;
+                this->result_yaw_ = result.result->success_yaw;
                 this->goal_done_ = true;
+                // // log the result
+                // RCLCPP_INFO(this->get_logger(), "Result Pos: %s", this->result_pos_ ? "Success" : "Failure");
+                // RCLCPP_INFO(this->get_logger(), "Result Yaw: %s", this->result_yaw_ ? "Success" : "Failure");
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_INFO(this->get_logger(), "Goal was aborted");
@@ -113,40 +123,19 @@ TEST_F(WaypointActionClientTest, TestGoalCompletion1) {
   } else {
     RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
   }
-  action_client_->send_goal(0.5, 0.0, 0.0);
+
+  action_client_->send_goal(0.5, 0.5, 0.0);
   // log goal sent content
   RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
   while(!action_client_->is_goal_done()) {
     rclcpp::spin_some(action_client_);
   }
+
   EXPECT_TRUE(action_client_->is_goal_done());
-  // log if goal was done or not
-  if (action_client_->is_goal_done()) {
-    RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal is done");
-  } else {
-    RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Goal is not done");
-  }
+  // show the result
+  RCLCPP_INFO(action_client_->get_logger(), "Result Pos: %s", action_client_->get_result_pos() ? "Success" : "Failure");
+  RCLCPP_INFO(action_client_->get_logger(), "Result Yaw: %s", action_client_->get_result_yaw() ? "Success" : "Failure");
+  EXPECT_TRUE(action_client_->get_result_pos());
+  EXPECT_TRUE(action_client_->get_result_yaw());
 }
 
-TEST_F(WaypointActionClientTest, TestGoalCompletion2) {
-  EXPECT_TRUE(action_client_->is_server_available());
-  // log if server is available or not
-  if (action_client_->is_server_available()) {
-    RCLCPP_INFO(action_client_->get_logger(), "~~~~~Server is available");
-  } else {
-    RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Server is not available");
-  }
-  action_client_->send_goal(0.0, 0.5, 0.0);
-  // log goal sent content
-  RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal sent");
-  while(!action_client_->is_goal_done()) {
-    rclcpp::spin_some(action_client_);
-  }
-  EXPECT_TRUE(action_client_->is_goal_done());
-  // log if goal was done or not
-  if (action_client_->is_goal_done()) {
-    RCLCPP_INFO(action_client_->get_logger(), "~~~~~Goal is done");
-  } else {
-    RCLCPP_ERROR(action_client_->get_logger(), "~~~~~Goal is not done");
-  }
-}
