@@ -142,7 +142,8 @@ private:
             {
                 // Cancelled
                 RCLCPP_INFO(this->get_logger(), "The goal has been cancelled/preempted");
-                result_->success = false;
+                result_->success_pos = false;
+                result_->success_yaw = false;
                 goal_handle->canceled(result_);
                 res = rclcpp_action::GoalResponse::REJECT;
                 break;
@@ -185,8 +186,20 @@ private:
         // Return result
         if (res == rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE)
         {
-            result_->success = true;
+            // check the final position
+            if (err_pos > dist_precision_)  result_->success_pos = false;
+            else result_->success_pos = true;
+            // check the final yaw
+            if (std::fabs(err_yaw) > yaw_precision_) result_->success_yaw = false;
+            else result_->success_yaw = true;
+            // set the result
             goal_handle->succeed(result_);
+
+            // Log the results
+            RCLCPP_INFO(this->get_logger(), "Final Position Error: %.2f - Allowed: %.2f", err_pos, dist_precision_);
+            RCLCPP_INFO(this->get_logger(), "Final Yaw Error: %.2f - Allowed: %.2f", std::fabs(err_yaw), yaw_precision_);
+            RCLCPP_INFO(this->get_logger(), "Success Position: %s", result_->success_pos ? "true" : "false");
+            RCLCPP_INFO(this->get_logger(), "Success Yaw: %s", result_->success_yaw ? "true" : "false");
         }
 
         return res;
