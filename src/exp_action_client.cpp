@@ -11,7 +11,9 @@ class WaypointActionClient : public rclcpp::Node
 {
 public:
     WaypointActionClient() : Node("waypoint_action_client"),
-                            goal_done_(false)
+                            goal_done_(false),
+                            result_pos_(false),
+                            result_yaw_(false)
     {
         this->client_ptr_ = rclcpp_action::create_client<WaypointAction>(
             this,
@@ -26,6 +28,8 @@ public:
     std::shared_future<GoalHandleWaypoint::SharedPtr> send_goal(double x, double y, double z)
     {
         this->goal_done_ = false;
+        this->result_pos_ = false;
+        this->result_yaw_ = false;
 
         auto goal_msg = WaypointAction::Goal();
         goal_msg.position.x = x;
@@ -42,14 +46,15 @@ public:
         return this->client_ptr_->async_send_goal(goal_msg, send_goal_options);
     }
 
-    bool is_goal_done() const
-    {
-        return this->goal_done_;
-    }
+    bool is_goal_done() const { return goal_done_; }
+    bool get_result_pos() const { return result_pos_; }
+    bool get_result_yaw() const { return result_yaw_; }
     
 private:
     rclcpp_action::Client<WaypointAction>::SharedPtr client_ptr_;
     bool goal_done_;
+    bool result_pos_;
+    bool result_yaw_;
 
     void goal_response_callback(std::shared_future<GoalHandleWaypoint::SharedPtr> future)
     {
@@ -74,7 +79,12 @@ private:
         {
             case rclcpp_action::ResultCode::SUCCEEDED:
                 RCLCPP_INFO(this->get_logger(), "Goal succeeded");
+                this->result_pos_ = result.result->success_pos;
+                this->result_yaw_ = result.result->success_yaw;
                 this->goal_done_ = true;
+                // log the result
+                RCLCPP_INFO(this->get_logger(), "Result Pos: %s", this->result_pos_ ? "Success" : "Failure");
+                RCLCPP_INFO(this->get_logger(), "Result Yaw: %s", this->result_yaw_ ? "Success" : "Failure");
                 break;
             case rclcpp_action::ResultCode::ABORTED:
                 RCLCPP_INFO(this->get_logger(), "Goal was aborted");
@@ -104,10 +114,17 @@ int main(int argc, char ** argv)
     while(!action_client->is_goal_done()) {
         rclcpp::spin_some(action_client);
     }
+    // show the result
+    RCLCPP_INFO(action_client->get_logger(), "Result Pos: %s", action_client->get_result_pos() ? "Success" : "Failure");
+    RCLCPP_INFO(action_client->get_logger(), "Result Yaw: %s", action_client->get_result_yaw() ? "Success" : "Failure");
+
     action_client->send_goal(0.0, 0.5, 0.0);
     while(!action_client->is_goal_done()) {
         rclcpp::spin_some(action_client);
     }
+    // show the result
+    RCLCPP_INFO(action_client->get_logger(), "Result Pos: %s", action_client->get_result_pos() ? "Success" : "Failure");
+    RCLCPP_INFO(action_client->get_logger(), "Result Yaw: %s", action_client->get_result_yaw() ? "Success" : "Failure");
 
     rclcpp::shutdown();
     return 0;
